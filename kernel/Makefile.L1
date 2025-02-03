@@ -504,14 +504,14 @@ SBLASOBJS	+= \
 	sasum_k$(TSUFFIX).$(SUFFIX) ssum_k$(TSUFFIX).$(SUFFIX) saxpy_k$(TSUFFIX).$(SUFFIX) scopy_k$(TSUFFIX).$(SUFFIX) \
 	sdot_k$(TSUFFIX).$(SUFFIX) sdsdot_k$(TSUFFIX).$(SUFFIX) dsdot_k$(TSUFFIX).$(SUFFIX) \
 	snrm2_k$(TSUFFIX).$(SUFFIX) srot_k$(TSUFFIX).$(SUFFIX) sscal_k$(TSUFFIX).$(SUFFIX) sswap_k$(TSUFFIX).$(SUFFIX) \
-	saxpby_k$(TSUFFIX).$(SUFFIX)
+	saxpby_k$(TSUFFIX).$(SUFFIX) svdot_k_U$(TSUFFIX).$(SUFFIX) svdot_k_L$(TSUFFIX).$(SUFFIX)
 
 DBLASOBJS	+= \
 	 damax_k$(TSUFFIX).$(SUFFIX)  damin_k$(TSUFFIX).$(SUFFIX)  dmax_k$(TSUFFIX).$(SUFFIX)  dmin_k$(TSUFFIX).$(SUFFIX) \
 	idamax_k$(TSUFFIX).$(SUFFIX) idamin_k$(TSUFFIX).$(SUFFIX) idmax_k$(TSUFFIX).$(SUFFIX) idmin_k$(TSUFFIX).$(SUFFIX) \
 	dasum_k$(TSUFFIX).$(SUFFIX) daxpy_k$(TSUFFIX).$(SUFFIX) dcopy_k$(TSUFFIX).$(SUFFIX) ddot_k$(TSUFFIX).$(SUFFIX) \
 	dnrm2_k$(TSUFFIX).$(SUFFIX) drot_k$(TSUFFIX).$(SUFFIX) dscal_k$(TSUFFIX).$(SUFFIX) dswap_k$(TSUFFIX).$(SUFFIX) \
-	daxpby_k$(TSUFFIX).$(SUFFIX) dsum_k$(TSUFFIX).$(SUFFIX)
+	daxpby_k$(TSUFFIX).$(SUFFIX) dsum_k$(TSUFFIX).$(SUFFIX) dvdot_k_U$(TSUFFIX).$(SUFFIX) dvdot_k_L$(TSUFFIX).$(SUFFIX)
 
 QBLASOBJS	+= \
 	 qamax_k$(TSUFFIX).$(SUFFIX)  qamin_k$(TSUFFIX).$(SUFFIX)  qmax_k$(TSUFFIX).$(SUFFIX)  qmin_k$(TSUFFIX).$(SUFFIX) \
@@ -546,6 +546,18 @@ SBEXTOBJS        += \
 SBEXTOBJS        += \
 	 sbf16tos_k$(TSUFFIX).$(SUFFIX) dbf16tod_k$(TSUFFIX).$(SUFFIX)
 endif
+
+$(KDIR)svdot_k_L$(TSUFFIX).$(SUFFIX)  $(KDIR)svdot_k_L$(TPSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SVDOTKERNEL_L)
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -DLOWER $< -o $@
+
+$(KDIR)dvdot_k_L$(TSUFFIX).$(SUFFIX)  $(KDIR)dvdot_k_L$(TPSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(DVDOTKERNEL_L)
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -DLOWER $< -o $@
+
+$(KDIR)svdot_k_U$(TSUFFIX).$(SUFFIX)  $(KDIR)svdot_k_U$(TPSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SVDOTKERNEL_U)
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER $< -o $@
+
+$(KDIR)dvdot_k_U$(TSUFFIX).$(SUFFIX)  $(KDIR)dvdot_k_U$(TPSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(DVDOTKERNEL_U)
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -ULOWER $< -o $@
 
 ### AMAX ###
 

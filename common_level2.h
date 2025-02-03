@@ -44,6 +44,12 @@
 extern "C" {
 #endif
 
+int sgbmv_kernel_n(BLASLONG, BLASLONG, BLASLONG, BLASLONG, float*, BLASLONG, float*, float*, float);
+int sgbmv_kernel_t(BLASLONG, BLASLONG, BLASLONG, BLASLONG, float*, BLASLONG, float*, float*, float);
+int dgbmv_kernel_n(BLASLONG, BLASLONG, BLASLONG, BLASLONG, double*, BLASLONG, double*, double*, double);
+int dgbmv_kernel_t(BLASLONG, BLASLONG, BLASLONG, BLASLONG, double*, BLASLONG, double*, double*, double);
+
+
 int sbgemv_n(BLASLONG, BLASLONG, float, bfloat16 *, BLASLONG, bfloat16 *, BLASLONG, float, float *, BLASLONG);
 int sbgemv_t(BLASLONG, BLASLONG, float, bfloat16 *, BLASLONG, bfloat16 *, BLASLONG, float, float *, BLASLONG);
 int sbgemv_thread_n(BLASLONG, BLASLONG, float, bfloat16 *, BLASLONG, bfloat16 *, BLASLONG, float, float *, BLASLONG, int);
@@ -1355,6 +1361,29 @@ int xtbsv_CUU(BLASLONG, BLASLONG, xdouble *, BLASLONG, xdouble *, BLASLONG, void
 int xtbsv_CUN(BLASLONG, BLASLONG, xdouble *, BLASLONG, xdouble *, BLASLONG, void *);
 int xtbsv_CLU(BLASLONG, BLASLONG, xdouble *, BLASLONG, xdouble *, BLASLONG, void *);
 int xtbsv_CLN(BLASLONG, BLASLONG, xdouble *, BLASLONG, xdouble *, BLASLONG, void *);
+
+int dtbmv_kernel_lnn(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, double* a, BLASLONG lda, double* B, double* Y);
+int dtbmv_kernel_lnu(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, double* a, BLASLONG lda, double* B, double* Y);
+int dtbmv_kernel_ltn(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, double* a, BLASLONG lda, double* B, double* Y);
+int dtbmv_kernel_unn(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, double* a, BLASLONG lda, double* B, double* Y);
+int dtbmv_kernel_utn(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, double* a, BLASLONG lda, double* B, double* Y);
+int dtbmv_kernel_ltu(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, double* a, BLASLONG lda, double* B, double* Y);
+int dtbmv_kernel_unu(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, double* a, BLASLONG lda, double* B, double* Y);
+int dtbmv_kernel_utu(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, double* a, BLASLONG lda, double* B, double* Y);
+
+int stbmv_kernel_lnn(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, float* a, BLASLONG lda, float* B, float* Y);
+int stbmv_kernel_lnu(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, float* a, BLASLONG lda, float* B, float* Y);
+int stbmv_kernel_ltn(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, float* a, BLASLONG lda, float* B, float* Y);
+int stbmv_kernel_unn(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, float* a, BLASLONG lda, float* B, float* Y);
+int stbmv_kernel_utn(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, float* a, BLASLONG lda, float* B, float* Y);
+int stbmv_kernel_ltu(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, float* a, BLASLONG lda, float* B, float* Y);
+int stbmv_kernel_unu(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, float* a, BLASLONG lda, float* B, float* Y);
+int stbmv_kernel_utu(BLASLONG istart, BLASLONG iend, BLASLONG n, BLASLONG k, float* a, BLASLONG lda, float* B, float* Y);
+
+float stbsv_t_kernel(BLASLONG, float *, float *);
+double dtbsv_t_kernel(BLASLONG, double *, double *);
+int stbsv_n_kernel(BLASLONG, float *, float *, float);
+int dtbsv_n_kernel(BLASLONG, double *, double *, double);
 
 #ifdef __CUDACC__
 }

@@ -226,20 +226,19 @@ void CNAME(enum CBLAS_ORDER order,
 
   buffer = (FLOAT *)blas_memory_alloc(1);
 
-#ifdef SMP
-  if (m * n < 250000 || kl+ku < 15 )
+#if defined(SMP) && !defined(C910V) && !defined(RISCV64_ZVL256B)
+  if (1LL * m * n < 250000LL || kl+ku < 15 )
     nthreads = 1;
   else
     nthreads = num_cpu_avail(2);
 
   if (nthreads == 1) {
 #endif
-
+    
   (gbmv[(int)trans])(m, n, kl, ku, alpha, a, lda, x, incx, y, incy, buffer);
 
-#ifdef SMP
+#if defined(SMP) && !defined(C910V) && !defined(RISCV64_ZVL256B)
   } else {
-
     (gbmv_thread[(int)trans])(m, n, kl, ku, alpha, a, lda, x, incx, y, incy, buffer, nthreads);
 
   }

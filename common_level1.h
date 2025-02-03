@@ -42,6 +42,11 @@
 extern "C" {
 #endif
 
+int svdot_k_L(BLASLONG n, BLASLONG k, float alpha, float *a, BLASLONG lda, float *x, float *y, BLASLONG length);
+int svdot_k_U(BLASLONG n, BLASLONG k, float alpha, float *a, BLASLONG lda, float *x, float *y, BLASLONG length);
+int dvdot_k_L(BLASLONG n, BLASLONG k, double alpha, double *a, BLASLONG lda, double *x, double *y, BLASLONG length);
+int dvdot_k_U(BLASLONG n, BLASLONG k, double alpha, double *a, BLASLONG lda, double *x, double *y, BLASLONG length);
+
 float   sdot_k(BLASLONG, float   *, BLASLONG, float   *, BLASLONG);
 double dsdot_k(BLASLONG, float   *, BLASLONG, float *, BLASLONG);
 double  ddot_k(BLASLONG, double  *, BLASLONG, double  *, BLASLONG);

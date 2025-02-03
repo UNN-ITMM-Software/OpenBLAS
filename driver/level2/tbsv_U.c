@@ -54,39 +54,86 @@ int CNAME(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *b, BLASLONG inc
   }
 
   a += (n - 1) * lda;
-
-  for (i = n - 1; i >= 0; i--) {
-
-#ifdef TRANSA
-    length  = n - i - 1;
-    if (length > k) length = k;
-
-    if (length > 0) {
-      B[i] -= DOTU_K(length, a + 1, 1, B + i + 1, 1);
-    }
+#if defined(SKYLAKEX) || defined(C910V) || defined(RISCV64_ZVL256B)
+#ifdef DOUBLE
+  if (k > 64) {
+#else
+  if (k > 128) {
 #endif
-
+#endif
+    for (i = n - 1; i >= 0; i--) {
+#ifdef TRANSA
+      length  = n - i - 1;
+      if (length > k) length = k;
+      
+      if (length > 0) {
+        B[i] -= DOTU_K(length, a + 1, 1, B + i + 1, 1);
+      }
+#endif
+    
 #ifndef UNIT
 #ifdef TRANSA
-    B[i] /= a[0];
+      B[i] /= a[0];
 #else
-    B[i] /= a[k];
+      B[i] /= a[k];
 #endif
+#endif
+    
+#ifndef TRANSA
+      length  = i;
+      if (length > k) length = k;
+      
+      if (length > 0) {
+      AXPYU_K(length, 0, 0,
+          - B[i],
+          a + k - length, 1, B + i - length, 1, NULL, 0);
+      }
+#endif
+    
+      a -= lda;
+    }
+#if defined(SKYLAKEX) || defined(C910V) || defined(RISCV64_ZVL256B)
+  } else {
+#ifdef TRANSA   
+    for (BLASLONG i = n - 1; i >= n - k; i--) {
+      for (BLASLONG j = 1; j <= n - i - 1; j++) {
+        B[i] -= a[j] * B[i + j];
+      }
+#ifndef UNIT
+      B[i] /= a[0];
+#endif
+      a -= lda;
+    }
+    for (BLASLONG i = n - k - 1; i >= 0; i--) {
+      FLOAT dot = TBSV_T(k, a + 1, B + i + 1);
+      B[i] -= dot;
+#ifndef UNIT
+      B[i] /= a[0];
+#endif
+      a -= lda;
+    }
 #endif
 
 #ifndef TRANSA
-    length  = i;
-    if (length > k) length = k;
-
-    if (length > 0) {
-      AXPYU_K(length, 0, 0,
-	     - B[i],
-	     a + k - length, 1, B + i - length, 1, NULL, 0);
+    for (BLASLONG i = n - 1; i >= k; i--) {
+#ifndef UNIT
+      B[i] /= a[k];
+#endif
+      TBSV_N(k, a, B + i - k, -B[i]);
+      a -= lda;
+    }
+    for (BLASLONG i = k - 1; i >= 0; i--) {
+#ifndef UNIT
+      B[i] /= a[k];
+#endif
+      for (BLASLONG j = 0; j < i; j++) {
+        B[j] -= a[k - i + j] * B[i];
+      }
+      a -= lda;
     }
 #endif
-
-    a -= lda;
   }
+#endif
 
   if (incb != 1) {
     COPY_K(n, buffer, 1, b, incb);
@@ -94,4 +141,3 @@ int CNAME(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *b, BLASLONG inc
 
   return 0;
 }
-

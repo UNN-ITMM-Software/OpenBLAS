@@ -40,32 +40,22 @@
 #include <ctype.h>
 #include "common.h"
 
-// const static FLOAT dp1 = 1.;
-
-int CNAME(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *b, BLASLONG incb, void *buffer){
-
-  BLASLONG i;
-  FLOAT *B = b;
-  BLASLONG length;
-
-  if (incb != 1) {
-    B = buffer;
-    COPY_K(n, b, incb, buffer, 1);
-  }
-
+static int TBMV_L_BASE(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *B) {
+  BLASLONG i, length;
+  
   a += (n - 1) * lda;
-
   for (i = n - 1; i >= 0; i--) {
 
 #ifndef TRANSA
     length  = n - i - 1;
     if (length > k) length = k;
-
+	
     if (length > 0) {
       AXPYU_K(length, 0, 0,
 	     B[i],
 	     a + 1, 1, B + i + 1, 1, NULL, 0);
     }
+
 #endif
 
 #ifndef UNIT
@@ -87,7 +77,117 @@ int CNAME(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *b, BLASLONG inc
 
     a -= lda;
   }
+  return 0;
+}
 
+static int TBMV_L_OPTIMIZED(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *B) {
+  BLASLONG i, length, istart, iend;
+
+#ifndef TRANSA  
+  a += (n - 1) * lda; 
+  istart = n - k;
+
+  for (i = n - 1; i >= istart; i--) {
+
+    length  = n - i - 1;
+    if (length > k) length = k;
+	
+	if (length > 0) {
+      AXPYU_K(length, 0, 0,
+	     B[i],
+	     a + 1, 1, B + i + 1, 1, NULL, 0);
+    }
+
+#ifndef UNIT
+    B[i] *= a[0];
+#endif
+    a -= lda;	
+  }
+
+#ifndef UNIT
+  TBMV_LNN(n - k - 1, 0, n, k, a, lda, B, B);
+#else
+  TBMV_LNU(n - k - 1, 0, n, k, a, lda, B, B);
+#endif
+  
+#else
+
+  istart = n - 1;
+  iend = (k > 0) ? k + 1 : 0;
+#ifndef UNIT  
+  TBMV_UTN(n, iend, n, k, a, lda, B, B);
+#else
+  if (k > 0) 
+	  TBMV_UTU(n, iend, n, k, a, lda, B, B);
+#endif
+
+  a += (iend - 1) * lda;
+  for (i = iend - 1; i >= 0; i--) {
+	  
+#ifndef UNIT
+    B[i] *= a[k];
+#endif
+
+    length  = i;
+    if (length > k) length = k;
+
+    if (length > 0) {
+      B[i] += DOTU_K(length, a + k - length, 1, B + i - length, 1);
+    }
+    a -= lda;
+	
+  }
+#endif
+  return 0;
+}
+
+
+// const static FLOAT dp1 = 1.;
+
+int CNAME(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *b, BLASLONG incb, void *buffer){
+  FLOAT *B = b;
+
+  if (incb != 1) {
+    B = buffer;
+    COPY_K(n, b, incb, buffer, 1);
+  }
+
+#ifndef COMPLEX
+#if !defined (SKYLAKEX) && !defined (C910V) && !defined (RISCV64_ZVL256B)
+	TBMV_L_BASE(n, k, a, lda, B);
+#else
+	BLASLONG kmax = 54, kmin = 0;
+#ifdef TRANSA
+#if defined (RISCV64_ZVL256B)
+#if defined (DOUBLE)
+	kmax = 5;
+#else
+	kmax = 14;
+#endif
+#endif
+#else
+#if defined (SKYLAKEX) || defined (RISCV64_ZVL256B)
+	kmax = 6;
+#else
+#if defined (DOUBLE)
+	kmin = 10; kmax = 15;
+#else 
+	kmax = 7;
+#endif
+#endif 
+#endif 
+
+	if ((k >= kmin) && (k <= kmax)) {
+		TBMV_L_OPTIMIZED(n, k, a, lda, B);
+	}
+	else {
+		TBMV_L_BASE(n, k, a, lda, B);
+	}
+#endif
+#else //COMPLEX
+  TBMV_L_BASE(n, k, a, lda, B);	  
+#endif 
+  
   if (incb != 1) {
     COPY_K(n, buffer, 1, b, incb);
   }

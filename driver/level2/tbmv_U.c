@@ -42,54 +42,151 @@
 
 // const static FLOAT dp1 = 1.;
 
-int CNAME(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *b, BLASLONG incb, void *buffer){
-
-  BLASLONG i;
-  FLOAT *B = b;
-  BLASLONG length;
-
-  if (incb != 1) {
-    B = buffer;
-    COPY_K(n, b, incb, buffer, 1);
-  }
-
-  for (i = 0; i < n; i++) {
+static int TBMV_U_BASE(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *B) {
+  BLASLONG i, length;
+		for (i = 0; i < n; i++) {
 
 #ifndef TRANSA
-    length  = i;
-    if (length > k) length = k;
+			length = i;
+			if (length > k) length = k;
 
-    if (length > 0) {
-      AXPYU_K(length, 0, 0,
-	     B[i],
-	     a + k - length, 1, B + i - length, 1, NULL, 0);
-    }
+			if (length > 0) {
+				AXPYU_K(length, 0, 0,
+					B[i],
+					a + k - length, 1, B + i - length, 1, NULL, 0);
+			}
 #endif
 
 #ifndef UNIT
 #ifndef TRANSA
-    B[i] *= a[k];
+			B[i] *= a[k];
 #else
-    B[i] *= a[0];
+			B[i] *= a[0];
 #endif
 #endif
 
 #ifdef TRANSA
-    length  = n - i - 1;
-    if (length > k) length = k;
+			length = n - i - 1;
+			if (length > k) length = k;
 
-    if (length > 0) {
-      B[i] += DOTU_K(length, a + 1, 1, B + i + 1, 1);
-    }
+			if (length > 0) {
+				B[i] += DOTU_K(length, a + 1, 1, B + i + 1, 1);
+			}
 #endif
 
-    a += lda;
-  }
+			a += lda;
+		}
+	return 0;
+}
 
-  if (incb != 1) {
-    COPY_K(n, buffer, 1, b, incb);
-  }
+static int TBMV_U_OPTIMIZED(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *B) {
+  BLASLONG i, length, istart, iend;
 
-  return 0;
+#ifndef TRANSA  
+		iend = k;
+		for (i = 0; i < iend; i++) {
+			length = i;
+			if (length > k) length = k;
+			if (length > 0) {
+				AXPYU_K(length, 0, 0,
+					B[i],
+					a + k - length, 1, B + i - length, 1, NULL, 0);
+			}
+#ifndef UNIT
+			B[i] *= a[k];
+#endif
+			a += lda;
+		}
+#ifndef UNIT
+	TBMV_UNN(k, n, n, k, a, lda, B, B);
+#else
+	TBMV_UNU(k, n, n, k, a, lda, B, B);
+#endif
+
+#else
+
+#ifndef UNIT
+		TBMV_LTN(0, n - k, n, k, a, lda, B, B);
+#else
+		TBMV_LTU(0, n - k, n, k, a, lda, B, B);
+#endif
+		a += lda * (n - k);
+
+		for (i = n - k; i < n; i++) {
+
+#ifndef UNIT
+			B[i] *= a[0];
+#endif
+			length = n - i - 1;
+
+			if (length > 0) {
+				B[i] += DOTU_K(length, a + 1, 1, B + i + 1, 1);
+			}
+			a += lda;
+		}
+#endif  
+	return 0;
+}
+
+
+int CNAME(BLASLONG n, BLASLONG k, FLOAT* a, BLASLONG lda, FLOAT* b, BLASLONG incb, void* buffer) {
+
+	BLASLONG i, j, ii, iend;
+	FLOAT* B = b;
+	BLASLONG length;
+	BLASLONG istart;
+
+	if (incb != 1) {
+		B = buffer;
+		COPY_K(n, b, incb, buffer, 1);
+	}
+
+#ifndef COMPLEX
+#if !defined (SKYLAKEX) && !defined (C910V) && !defined (RISCV64_ZVL256B)
+	TBMV_U_BASE(n, k, a, lda, B);
+#else
+	BLASLONG kmax = 54, kmin = 0;
+
+#ifndef TRANSA
+	#if defined (C910V) || defined (SKYLAKEX)
+		#if defined (DOUBLE)
+			kmin = 9;
+		#else 
+			kmin = 20;
+		#endif	
+	#else
+		#if defined (DOUBLE)
+		kmax = 12;
+		#else
+		kmax = 32;
+		#endif
+	#endif	
+#else
+	#if defined (RISCV64_ZVL256B)
+		#if defined (DOUBLE)
+			kmax = 9;
+		#else
+			kmax = 20;
+		#endif
+	#endif
+#endif
+
+	if ((k >= kmin) && (k <= kmax)) {
+		TBMV_U_OPTIMIZED(n, k, a, lda, B);
+	}
+	else {
+		TBMV_U_BASE(n, k, a, lda, B);
+	}
+#endif
+
+#else // COMPLEX
+	TBMV_U_BASE(n, k, a, lda, B);
+#endif
+
+	if (incb != 1) {
+		COPY_K(n, buffer, 1, b, incb);
+	}
+
+	return 0;
 }
 

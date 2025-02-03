@@ -49,6 +49,28 @@
 #include "common_x.h"
 
 #ifndef COMPLEX
+#ifndef XDOUBLE
+#ifndef LOWER
+
+#if !defined(DOUBLE)
+#define	VDOT_U_K			SVDOT_U_K
+#else
+#define	VDOT_U_K			DVDOT_U_K
+#endif
+
+#else
+
+#if !defined(DOUBLE)
+#define	VDOT_L_K			SVDOT_L_K
+#else
+#define	VDOT_L_K			DVDOT_L_K
+#endif
+
+#endif
+#endif
+#endif
+
+#ifndef COMPLEX
 #ifdef XDOUBLE
 
 #define	AMAX_K			QAMAX_K
@@ -95,6 +117,7 @@
 #define	GEMM_OTCOPY		QGEMM_OTCOPY
 #define	GEMM_INCOPY		QGEMM_INCOPY
 #define	GEMM_ITCOPY		QGEMM_ITCOPY
+
 
 #ifdef UNIT
 
@@ -379,6 +402,9 @@
 #define	SYMV_U			DSYMV_U
 #define	SYMV_L			DSYMV_L
 
+#define TBSV_N     DTBSV_N
+#define TBSV_T     DTBSV_T
+
 #define	SYMV_THREAD_U		DSYMV_THREAD_U
 #define	SYMV_THREAD_L		DSYMV_THREAD_L
 
@@ -386,6 +412,9 @@
 #define	GEMM_OTCOPY		DGEMM_OTCOPY
 #define	GEMM_INCOPY		DGEMM_INCOPY
 #define	GEMM_ITCOPY		DGEMM_ITCOPY
+
+#define GBMV_N				DGBMV_N
+#define GBMV_T				DGBMV_T
 
 #ifdef UNIT
 
@@ -407,6 +436,16 @@
 #define	TRSM_ILNCOPY		DTRSM_ILNUCOPY
 #define	TRSM_ILTCOPY		DTRSM_ILTUCOPY
 
+#define TBMV_UNN			DTBMV_UNN
+#define TBMV_UNU			DTBMV_UNU
+#define TBMV_LNN			DTBMV_LNN
+#define TBMV_LNU			DTBMV_LNU
+#define TBMV_UTN			DTBMV_UTN
+#define TBMV_UTU			DTBMV_UTU
+#define TBMV_LTN			DTBMV_LTN
+#define TBMV_LTU			DTBMV_LTU
+
+
 #else
 
 #define	TRMM_OUNCOPY		DTRMM_OUNNCOPY
@@ -426,6 +465,15 @@
 #define	TRSM_IUTCOPY		DTRSM_IUTNCOPY
 #define	TRSM_ILNCOPY		DTRSM_ILNNCOPY
 #define	TRSM_ILTCOPY		DTRSM_ILTNCOPY
+
+#define TBMV_UNN			DTBMV_UNN
+#define TBMV_UNU			DTBMV_UNU
+#define TBMV_LNN			DTBMV_LNN
+#define TBMV_LNU			DTBMV_LNU
+#define TBMV_UTN			DTBMV_UTN
+#define TBMV_UTU			DTBMV_UTU
+#define TBMV_LTN			DTBMV_LTN
+#define TBMV_LTU			DTBMV_LTU
 
 #endif
 
@@ -753,6 +801,10 @@
 #define	GEMM_THREAD_RC		SBGEMM_THREAD_NT
 #define	GEMM_THREAD_RR		SBGEMM_THREAD_NN
 
+#define GBMV_N				SGBMV_N
+#define GBMV_T				SGBMV_T
+
+
 #ifdef UNIT
 
 #define	TRMM_OUNCOPY		STRMM_OUNUCOPY
@@ -772,6 +824,15 @@
 #define	TRSM_IUTCOPY		STRSM_IUTUCOPY
 #define	TRSM_ILNCOPY		STRSM_ILNUCOPY
 #define	TRSM_ILTCOPY		STRSM_ILTUCOPY
+
+#define TBMV_UNN			STBMV_UNN
+#define TBMV_UNU			STBMV_UNU
+#define TBMV_LNN			STBMV_LNN
+#define TBMV_LNU			STBMV_LNU
+#define TBMV_UTN			STBMV_UTN
+#define TBMV_UTU			STBMV_UTU
+#define TBMV_LTN			STBMV_LTN
+#define TBMV_LTU			STBMV_LTU
 
 #else
 
@@ -931,6 +992,16 @@
 #define	HERK_THREAD_LR		SSYRK_THREAD_LN
 #define	HERK_THREAD_LC		SSYRK_THREAD_LT
 
+#define TBMV_UNN			STBMV_UNN
+#define TBMV_UNU			STBMV_UNU
+#define TBMV_LNN			STBMV_LNN
+#define TBMV_LNU			STBMV_LNU
+#define TBMV_UTN			STBMV_UTN
+#define TBMV_UTU			STBMV_UTU
+#define TBMV_LTN			STBMV_LTN
+#define TBMV_LTU			STBMV_LTU
+
+
 #define OMATCOPY_K_CN		SOMATCOPY_K_CN
 #define OMATCOPY_K_RN		SOMATCOPY_K_RN
 #define OMATCOPY_K_CT		SOMATCOPY_K_CT
@@ -998,10 +1069,16 @@
 #define	SYMV_THREAD_U		SSYMV_THREAD_U
 #define	SYMV_THREAD_L		SSYMV_THREAD_L
 
+#define TBSV_N     STBSV_N
+#define TBSV_T     STBSV_T
+
 #define	GEMM_ONCOPY		SGEMM_ONCOPY
 #define	GEMM_OTCOPY		SGEMM_OTCOPY
 #define	GEMM_INCOPY		SGEMM_INCOPY
 #define	GEMM_ITCOPY		SGEMM_ITCOPY
+
+#define GBMV_N				SGBMV_N
+#define GBMV_T				SGBMV_T
 
 #ifdef UNIT
 
@@ -1023,6 +1100,15 @@
 #define	TRSM_ILNCOPY		STRSM_ILNUCOPY
 #define	TRSM_ILTCOPY		STRSM_ILTUCOPY
 
+#define TBMV_UNN			STBMV_UNN
+#define TBMV_UNU			STBMV_UNU
+#define TBMV_LNN			STBMV_LNN
+#define TBMV_LNU			STBMV_LNU
+#define TBMV_UTN			STBMV_UTN
+#define TBMV_UTU			STBMV_UTU
+#define TBMV_LTN			STBMV_LTN
+#define TBMV_LTU			STBMV_LTU
+
 #else
 
 #define	TRMM_OUNCOPY		STRMM_OUNNCOPY
@@ -1042,6 +1128,16 @@
 #define	TRSM_IUTCOPY		STRSM_IUTNCOPY
 #define	TRSM_ILNCOPY		STRSM_ILNNCOPY
 #define	TRSM_ILTCOPY		STRSM_ILTNCOPY
+
+#define TBMV_UNN			STBMV_UNN
+#define TBMV_UNU			STBMV_UNU
+#define TBMV_LNN			STBMV_LNN
+#define TBMV_LNU			STBMV_LNU
+#define TBMV_UTN			STBMV_UTN
+#define TBMV_UTU			STBMV_UTU
+#define TBMV_LTN			STBMV_LTN
+#define TBMV_LTU			STBMV_LTU
+
 
 #endif
 
@@ -1271,6 +1367,9 @@
 #define GEMM_SMALL_KERNEL_B0_NT    SGEMM_SMALL_KERNEL_B0_NT
 #define GEMM_SMALL_KERNEL_B0_TN    SGEMM_SMALL_KERNEL_B0_TN
 #define GEMM_SMALL_KERNEL_B0_TT    SGEMM_SMALL_KERNEL_B0_TT
+
+#define GBMV_N				SGBMV_N
+#define GBMV_T				SGBMV_T
 
 #endif
 #else

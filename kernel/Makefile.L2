@@ -213,12 +213,33 @@ SBLASOBJS	+= \
 endif
 ifeq ($(BUILD_SINGLE),1)
 SBLASOBJS	+= \
-	sger_k$(TSUFFIX).$(SUFFIX)
+	sger_k$(TSUFFIX).$(SUFFIX) \
+	stbmv_kernel_lnn$(TSUFFIX).$(SUFFIX) \
+	stbmv_kernel_lnu$(TSUFFIX).$(SUFFIX) \
+	stbmv_kernel_unn$(TSUFFIX).$(SUFFIX) \
+    stbmv_kernel_ltn$(TSUFFIX).$(SUFFIX) \
+	stbmv_kernel_utn$(TSUFFIX).$(SUFFIX) \
+	stbmv_kernel_unu$(TSUFFIX).$(SUFFIX) \
+    stbmv_kernel_ltu$(TSUFFIX).$(SUFFIX) \
+	stbmv_kernel_utu$(TSUFFIX).$(SUFFIX) \
+	stbsv_n_kernel$(TSUFFIX).$(SUFFIX) stbsv_t_kernel$(TSUFFIX).$(SUFFIX) sgbmv_kernel_n$(TSUFFIX).$(SUFFIX) \
+    sgbmv_kernel_t$(TSUFFIX).$(SUFFIX)
+
 endif
 ifeq ($(BUILD_DOUBLE),1)
 DBLASOBJS	+= \
 	dgemv_n$(TSUFFIX).$(SUFFIX) dgemv_t$(TSUFFIX).$(SUFFIX) dsymv_U$(TSUFFIX).$(SUFFIX) dsymv_L$(TSUFFIX).$(SUFFIX) \
-	dger_k$(TSUFFIX).$(SUFFIX)
+	dger_k$(TSUFFIX).$(SUFFIX) \
+	dtbmv_kernel_lnn$(TSUFFIX).$(SUFFIX) \
+	dtbmv_kernel_lnu$(TSUFFIX).$(SUFFIX) \
+	dtbmv_kernel_unn$(TSUFFIX).$(SUFFIX) \
+	dtbmv_kernel_ltn$(TSUFFIX).$(SUFFIX) \
+	dtbmv_kernel_utn$(TSUFFIX).$(SUFFIX) \
+	dtbmv_kernel_unu$(TSUFFIX).$(SUFFIX) \
+	dtbmv_kernel_ltu$(TSUFFIX).$(SUFFIX) \
+	dtbmv_kernel_utu$(TSUFFIX).$(SUFFIX) \
+	dtbsv_n_kernel$(TSUFFIX).$(SUFFIX) dtbsv_t_kernel$(TSUFFIX).$(SUFFIX) \
+	dgbmv_kernel_n$(TSUFFIX).$(SUFFIX) dgbmv_kernel_t$(TSUFFIX).$(SUFFIX)
 endif
 QBLASOBJS	+= \
 	qgemv_n$(TSUFFIX).$(SUFFIX) qgemv_t$(TSUFFIX).$(SUFFIX) qsymv_U$(TSUFFIX).$(SUFFIX) qsymv_L$(TSUFFIX).$(SUFFIX) \
@@ -361,23 +382,70 @@ $(KDIR)xgemv_s$(TSUFFIX).$(SUFFIX) $(KDIR)xgemv_s$(TSUFFIX).$(PSUFFIX) : $(KERNE
 $(KDIR)xgemv_d$(TSUFFIX).$(SUFFIX) $(KDIR)xgemv_d$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(XGEMVTKERNEL)
 	$(CC) -c $(CFLAGS) -DXDOUBLE -DCOMPLEX -DTRANS -DCONJ -DXCONJ $< -o $@
 
-
-ifneq "$(or (BUILD_SINGLE),$(BUILD_DOUBLE))" ""
+ifneq "$(or $(BUILD_SINGLE),$(BUILD_DOUBLE))" ""
 $(KDIR)ssymv_U$(TSUFFIX).$(SUFFIX)  $(KDIR)ssymv_U$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SSYMV_U_KERNEL) $(SSYMV_U_PARAM)
 	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER $< -o $@
 
 $(KDIR)ssymv_L$(TSUFFIX).$(SUFFIX)  $(KDIR)ssymv_L$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SSYMV_L_KERNEL)  $(SSYMV_L_PARAM)
 	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -DLOWER $< -o $@
+	
+$(KDIR)sgbmv_kernel_n$(TSUFFIX).$(SUFFIX)  $(KDIR)sgbmv_kernel_n$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SGBMV_N_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -UTRANS $< -o $@
+
+$(KDIR)sgbmv_kernel_t$(TSUFFIX).$(SUFFIX)  $(KDIR)sgbmv_kernel_t$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SGBMV_T_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -DTRANS $< -o $@
+  
+$(KDIR)stbsv_n_kernel$(TSUFFIX).$(SUFFIX)  $(KDIR)stbsv_n_kernel$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(STBSV_N_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER $< -o $@
+
+$(KDIR)stbsv_t_kernel$(TSUFFIX).$(SUFFIX)  $(KDIR)stbsv_t_kernel$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(STBSV_T_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER $< -o $@
+
+$(KDIR)stbmv_kernel_lnu$(TSUFFIX).$(SUFFIX) $(KDIR)stbmv_kernel_lnu$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(STBMV_LN_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -DLOWER -DUNIT -UTRANS $< -o $@
+	
+$(KDIR)stbmv_kernel_lnn$(TSUFFIX).$(SUFFIX) $(KDIR)stbmv_kernel_lnn$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(STBMV_LN_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -DLOWER -UUNIT -UTRANS $< -o $@
+
+$(KDIR)stbmv_kernel_unn$(TSUFFIX).$(SUFFIX) $(KDIR)stbmv_kernel_unn$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(STBMV_UN_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER -UTRANS -UUNIT $< -o $@
+
+$(KDIR)stbmv_kernel_unu$(TSUFFIX).$(SUFFIX) $(KDIR)stbmv_kernel_unu$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(STBMV_UN_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER -UTRANS -DUNIT $< -o $@
+	
+$(KDIR)stbmv_kernel_ltn$(TSUFFIX).$(SUFFIX) $(KDIR)stbmv_kernel_ltn$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(STBMV_LT_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -DLOWER -UUNIT -DTRANS $< -o $@
+
+$(KDIR)stbmv_kernel_ltu$(TSUFFIX).$(SUFFIX) $(KDIR)stbmv_kernel_ltu$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(STBMV_LT_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -DLOWER -DUNIT -DTRANS $< -o $@
+
+$(KDIR)stbmv_kernel_utn$(TSUFFIX).$(SUFFIX) $(KDIR)stbmv_kernel_utn$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(STBMV_UT_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER -UUNIT -DTRANS $< -o $@	
+
+$(KDIR)stbmv_kernel_utu$(TSUFFIX).$(SUFFIX) $(KDIR)stbmv_kernel_utu$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(STBMV_UT_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER -DUNIT -DTRANS $< -o $@	
+	
 endif
 
-
 ifeq ($(BUILD_DOUBLE),1)
+
+$(KDIR)dgbmv_kernel_n$(TSUFFIX).$(SUFFIX)  $(KDIR)dgbmv_kernel_n$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(DGBMV_N_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -UTRANS $< -o $@
+
+$(KDIR)dgbmv_kernel_t$(TSUFFIX).$(SUFFIX)  $(KDIR)dgbmv_kernel_t$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(DGBMV_T_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -DTRANS $< -o $@
 
 $(KDIR)dsymv_U$(TSUFFIX).$(SUFFIX)  $(KDIR)dsymv_U$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(DSYMV_U_KERNEL)  $(DSYMV_U_PARAM)
 	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -ULOWER $< -o $@
 
 $(KDIR)dsymv_L$(TSUFFIX).$(SUFFIX)  $(KDIR)dsymv_L$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(DSYMV_L_KERNEL)  $(DSYMV_L_PARAM)
 	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -DLOWER $< -o $@
+  
+$(KDIR)dtbsv_n_kernel$(TSUFFIX).$(SUFFIX)  $(KDIR)dtbsv_n_kernel$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(DTBSV_N_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -ULOWER $< -o $@
+  
+$(KDIR)dtbsv_t_kernel$(TSUFFIX).$(SUFFIX)  $(KDIR)dtbsv_t_kernel$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(DTBSV_T_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -ULOWER $< -o $@
 endif
 
 $(KDIR)qsymv_U$(TSUFFIX).$(SUFFIX)  $(KDIR)qsymv_U$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(QSYMV_U_KERNEL)
@@ -385,7 +453,32 @@ $(KDIR)qsymv_U$(TSUFFIX).$(SUFFIX)  $(KDIR)qsymv_U$(TSUFFIX).$(PSUFFIX)  : $(KER
 
 $(KDIR)qsymv_L$(TSUFFIX).$(SUFFIX)  $(KDIR)qsymv_L$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(QSYMV_L_KERNEL)
 	$(CC) -c $(CFLAGS) -UCOMPLEX -DXDOUBLE -DLOWER $< -o $@
+	
+$(KDIR)dtbmv_kernel_lnu$(TSUFFIX).$(SUFFIX) $(KDIR)dtbmv_kernel_lnu$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(DTBMV_LN_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -DLOWER -DUNIT -UTRANS $< -o $@
+	
+$(KDIR)dtbmv_kernel_lnn$(TSUFFIX).$(SUFFIX) $(KDIR)dtbmv_kernel_lnn$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(DTBMV_LN_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -DLOWER -UUNIT -UTRANS $< -o $@
 
+$(KDIR)dtbmv_kernel_unn$(TSUFFIX).$(SUFFIX) $(KDIR)dtbmv_kernel_unn$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(DTBMV_UN_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -ULOWER -UTRANS -UUNIT $< -o $@
+
+$(KDIR)dtbmv_kernel_unu$(TSUFFIX).$(SUFFIX) $(KDIR)dtbmv_kernel_unu$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(DTBMV_UN_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -ULOWER -UTRANS -DUNIT $< -o $@
+	
+$(KDIR)dtbmv_kernel_ltn$(TSUFFIX).$(SUFFIX) $(KDIR)dtbmv_kernel_ltn$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(DTBMV_LT_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -DLOWER -UUNIT -DTRANS $< -o $@
+
+$(KDIR)dtbmv_kernel_ltu$(TSUFFIX).$(SUFFIX) $(KDIR)dtbmv_kernel_ltu$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(DTBMV_LT_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -DLOWER -DUNIT -DTRANS $< -o $@
+
+$(KDIR)dtbmv_kernel_utn$(TSUFFIX).$(SUFFIX) $(KDIR)dtbmv_kernel_utn$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(DTBMV_UT_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -ULOWER -UUNIT -DTRANS $< -o $@	
+
+$(KDIR)dtbmv_kernel_utu$(TSUFFIX).$(SUFFIX) $(KDIR)dtbmv_kernel_utu$(TSUFFIX).$(PSUFFIX) : $(KERNELDIR)/$(DTBMV_UT_KERNEL)  
+	$(CC) -c $(CFLAGS) -UCOMPLEX -DDOUBLE -ULOWER -DUNIT -DTRANS $< -o $@	
+
+	
 ifeq ($(BUILD_COMPLEX),1)
 
 $(KDIR)csymv_U$(TSUFFIX).$(SUFFIX)  $(KDIR)csymv_U$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(CSYMV_U_KERNEL)   $(CSYMV_U_PARAM)
@@ -414,6 +507,18 @@ ifeq ($(BUILD_SINGLE),1)
 
 $(KDIR)sger_k$(TSUFFIX).$(SUFFIX)  $(KDIR)sger_k$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SGERKERNEL) $(SGERPARAM)
 	$(CC) -c $(CFLAGS) -UDOUBLE $< -o $@
+	
+$(KDIR)sgbmv_kernel_n$(TSUFFIX).$(SUFFIX)  $(KDIR)sgbmv_kernel_n$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SGBMV_N_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -UTRANS $< -o $@
+
+$(KDIR)sgbmv_kernel_t$(TSUFFIX).$(SUFFIX)  $(KDIR)sgbmv_kernel_t$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(SGBMV_T_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -DTRANS $< -o $@
+	
+$(KDIR)stbsv_n_kernel$(TSUFFIX).$(SUFFIX)  $(KDIR)stbsv_n_kernel$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(STBSV_N_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER $< -o $@
+  
+$(KDIR)stbsv_t_kernel$(TSUFFIX).$(SUFFIX)  $(KDIR)stbsv_t_kernel$(TSUFFIX).$(PSUFFIX)  : $(KERNELDIR)/$(STBSV_T_KERNEL) 
+	$(CC) -c $(CFLAGS) -UCOMPLEX -UDOUBLE -ULOWER $< -o $@
 endif
 
 ifeq ($(BUILD_DOUBLE),1)

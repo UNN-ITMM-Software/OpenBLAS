@@ -3,6 +3,8 @@
 
 #ifndef DYNAMIC_ARCH
 
+#define	SVDOT_L_K		svdot_k_L
+#define	SVDOT_U_K		svdot_k_U
 #define	SAMAX_K			samax_k
 #define	SAMIN_K			samin_k
 #define	SMAX_K			smax_k
@@ -45,6 +47,20 @@
 #define SSYMV_THREAD_U		ssymv_thread_U
 #define SSYMV_THREAD_L		ssymv_thread_L
 
+#define STBMV_LNN		stbmv_kernel_lnn
+#define STBMV_LNU		stbmv_kernel_lnu
+#define STBMV_UNN		stbmv_kernel_unn
+#define STBMV_UNU		stbmv_kernel_unu
+#define STBMV_LTN		stbmv_kernel_ltn
+#define STBMV_LTU		stbmv_kernel_ltu
+#define STBMV_UTN		stbmv_kernel_utn
+#define STBMV_UTU		stbmv_kernel_utu
+
+#define SGBMV_N			sgbmv_kernel_n
+#define SGBMV_T			sgbmv_kernel_t
+
+#define STBSV_N			stbsv_n_kernel
+#define STBSV_T			stbsv_t_kernel
 
 #define SGEMM_DIRECT_PERFORMANT    sgemm_direct_performant
 #define SGEMM_DIRECT		sgemm_direct
@@ -299,6 +315,10 @@
 #define SIMATCOPY_K_CT          gotoblas -> simatcopy_k_ct
 #define SIMATCOPY_K_RT          gotoblas -> simatcopy_k_rt
 
+#define SGBMV_N		sgbmv_kernel_n
+#define SGBMV_T		sgbmv_kernel_t
+
+
 #define SGEADD_K                gotoblas -> sgeadd_k 
 
 #define SGEMM_SMALL_MATRIX_PERMIT	gotoblas -> sgemm_small_matrix_permit
@@ -487,5 +507,17 @@
 #define	SHERK_THREAD_UC		ssyrk_thread_UT
 #define	SHERK_THREAD_LR		ssyrk_thread_LN
 #define	SHERK_THREAD_LC		ssyrk_thread_LT
+
+#define STBMV_LNN		stbmv_kernel_lnn
+#define STBMV_LNU		stbmv_kernel_lnu
+#define STBMV_UNN		stbmv_kernel_unn
+#define STBMV_UNU		stbmv_kernel_unu
+#define STBMV_LTN		stbmv_kernel_ltn
+#define STBMV_LTU		stbmv_kernel_ltu
+#define STBMV_UTN		stbmv_kernel_utn
+#define STBMV_UTU		stbmv_kernel_utu
+
+#define SGBMV_N		sgbmv_kernel_n
+#define SGBMV_T		sgbmv_kernel_t
 
 #endif

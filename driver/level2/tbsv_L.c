@@ -43,7 +43,6 @@
 // const static FLOAT dp1 = 1.;
 
 int CNAME(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *b, BLASLONG incb, void *buffer){
-
   BLASLONG i;
   FLOAT *B = b;
   BLASLONG length;
@@ -53,39 +52,87 @@ int CNAME(BLASLONG n, BLASLONG k, FLOAT *a, BLASLONG lda, FLOAT *b, BLASLONG inc
     COPY_K(n, b, incb, buffer, 1);
   }
 
-  for (i = 0; i < n; i++) {
+#if defined(SKYLAKEX) || defined(C910V) || defined(RISCV64_ZVL256B)
+#ifdef DOUBLE
+  if (k > 64) {
+#else
+  if (k > 128) {
+#endif
+#endif
+    for (i = 0; i < n; i++) {
 
 #ifdef TRANSA
-    length  = i;
-    if (length > k) length = k;
+      length  = i;
+      if (length > k) length = k;
 
-    if (length > 0) {
-      B[i] -= DOTU_K(length, a + k - length, 1, B + i - length, 1);
-    }
+      if (length > 0) {
+        B[i] -= DOTU_K(length, a + k - length, 1, B + i - length, 1);
+      }
 #endif
 
 #ifndef UNIT
 #ifdef TRANSA
-    B[i] /= a[k];
+      B[i] /= a[k];
 #else
-    B[i] /= a[0];
+      B[i] /= a[0];
 #endif
 #endif
 
 #ifndef TRANSA
-    length  = n - i - 1;
-    if (length > k) length = k;
+      length  = n - i - 1;
+      if (length > k) length = k;
 
-    if (length > 0) {
-      AXPYU_K(length, 0, 0,
-	     -B[i],
-	     a + 1, 1, B + i + 1, 1, NULL, 0);
+      if (length > 0) {
+        AXPYU_K(length, 0, 0,
+         -B[i],
+         a + 1, 1, B + i + 1, 1, NULL, 0);
+      }
+#endif
+
+      a += lda;
+    }
+#if defined(SKYLAKEX) || defined(C910V) || defined(RISCV64_ZVL256B)
+  } else {
+#ifdef TRANSA
+    for (BLASLONG i = 0; i < k; i++) {
+      for (BLASLONG j = k - i; j < k; j++) {
+        B[i] -= a[j] * B[j - k + i];
+      }
+#ifndef UNIT
+      B[i] /= a[k];
+#endif
+      a += lda;
+    }
+    for (BLASLONG i = k; i < n; i++) {
+      FLOAT dot = TBSV_T(k, a, B + i - k);
+      B[i] -= dot;
+#ifndef UNIT
+      B[i] /= a[k];
+#endif
+      a += lda;
     }
 #endif
 
-    a += lda;
+#ifndef TRANSA
+    for (BLASLONG i = 0; i <= n - k - 1; i++) {
+#ifndef UNIT
+      B[i] /= a[0];
+#endif
+      TBSV_N(k, a + 1, B + i + 1, -B[i]);
+      a += lda;
+    }
+    for (BLASLONG i = n - k; i < n; i++) {
+#ifndef UNIT
+      B[i] /= a[0];
+#endif
+      for (BLASLONG j = i + 1; j < n; j++) {
+        B[j] -= a[j - i] * B[i];
+      }
+      a += lda;
+    }
+#endif
   }
-
+#endif
   if (incb != 1) {
     COPY_K(n, buffer, 1, b, incb);
   }

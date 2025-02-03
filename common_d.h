@@ -3,6 +3,8 @@
 
 #ifndef DYNAMIC_ARCH
 
+#define	DVDOT_L_K		dvdot_k_L
+#define	DVDOT_U_K		dvdot_k_U
 #define	DAMAX_K			damax_k
 #define	DAMIN_K			damin_k
 #define	DMAX_K			dmax_k
@@ -42,6 +44,18 @@
 
 #define DSYMV_THREAD_U		dsymv_thread_U
 #define DSYMV_THREAD_L		dsymv_thread_L
+
+#define DTBMV_LNN		dtbmv_kernel_lnn
+#define DTBMV_LNU		dtbmv_kernel_lnu
+#define DTBMV_UNN		dtbmv_kernel_unn
+#define DTBMV_UNU		dtbmv_kernel_unu
+#define DTBMV_LTN		dtbmv_kernel_ltn
+#define DTBMV_LTU		dtbmv_kernel_ltu
+#define DTBMV_UTN		dtbmv_kernel_utn
+#define DTBMV_UTU		dtbmv_kernel_utu
+
+#define DTBSV_N        dtbsv_n_kernel
+#define DTBSV_T        dtbsv_t_kernel
 
 #define	DGEMM_ONCOPY		dgemm_oncopy
 #define	DGEMM_OTCOPY		dgemm_otcopy
@@ -158,6 +172,9 @@
 #define DGEADD_K                dgeadd_k 
 
 #define DGEMM_SMALL_MATRIX_PERMIT	dgemm_small_matrix_permit
+
+#define DGBMV_N		dgbmv_kernel_n
+#define DGBMV_T		dgbmv_kernel_t
 
 #else
 
@@ -469,5 +486,18 @@
 #define	DHERK_THREAD_UC		dsyrk_thread_UT
 #define	DHERK_THREAD_LR		dsyrk_thread_LN
 #define	DHERK_THREAD_LC		dsyrk_thread_LT
+
+#define DTBMV_LNN		dtbmv_kernel_lnn
+#define DTBMV_LNU		dtbmv_kernel_lnu
+#define DTBMV_UNN		dtbmv_kernel_unn
+#define DTBMV_UNU		dtbmv_kernel_unu
+#define DTBMV_LTN		dtbmv_kernel_ltn
+#define DTBMV_LTU		dtbmv_kernel_ltu
+#define DTBMV_UTN		dtbmv_kernel_utn
+#define DTBMV_UTU		dtbmv_kernel_utu
+
+#define DGBMV_N		dgbmv_kernel_n
+#define DGBMV_T		dgbmv_kernel_t
+
 
 #endif

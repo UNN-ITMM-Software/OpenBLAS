@@ -42,56 +42,114 @@
 
 int CNAME(BLASLONG n, BLASLONG k, FLOAT alpha,
 	  FLOAT *a, BLASLONG lda,
-	  FLOAT *x, BLASLONG incx, FLOAT *y, BLASLONG incy, void *buffer){
-
-  BLASLONG i, length;
-
-  FLOAT *X = x;
-  FLOAT *Y = y;
-  FLOAT *sbmvbuffer = (FLOAT *)buffer;
-  FLOAT *bufferY    = sbmvbuffer;
-  FLOAT *bufferX    = sbmvbuffer;
-
-  if (incy != 1) {
-    Y = bufferY;
-    bufferX    = (FLOAT *)(((BLASLONG)bufferY + n * sizeof(FLOAT) + 4095) & ~4095);
-    // sbmvbuffer = bufferX;
-    COPY_K(n, y, incy, Y, 1);
-  }
-
-  if (incx != 1) {
-    X = bufferX;
-    // sbmvbuffer = (FLOAT *)(((BLASLONG)bufferX + n * sizeof(FLOAT) + 4095) & ~4095);
-    COPY_K(n, x, incx, X, 1);
-  }
-
-  for (i = 0; i < n; i++) {
-
+	  FLOAT *x, BLASLONG incx, FLOAT *y, BLASLONG incy, void *buffer) {
+    BLASLONG i, length;
+    FLOAT *X = x;
+    FLOAT *Y = y;
+    FLOAT *sbmvbuffer = (FLOAT *)buffer;
+    FLOAT *bufferY = sbmvbuffer;
+    FLOAT *bufferX = sbmvbuffer;
+    if (incy != 1) {
+        Y = bufferY;
+        bufferX = (FLOAT *)(((BLASLONG)bufferY + n * sizeof(FLOAT) + 4095) & ~4095);
+        COPY_K(n, y, incy, Y, 1);
+    }
+    if (incx != 1) {
+        X = bufferX;
+        COPY_K(n, x, incx, X, 1);
+    }
+#if defined(C910V)||defined(RISCV64_ZVL256B)
 #ifndef LOWER
-    length  = i;
-    if (length > k) length = k;
-
-    AXPYU_K(length + 1, 0, 0,
-	   alpha * X[i],
-	   a + k - length, 1, Y + i - length, 1, NULL, 0);
-    Y[i] += alpha * DOTU_K(length, a + k - length, 1, X + i - length, 1);
+#if defined(RISCV64_ZVL256B)
+#if defined(DOUBLE)
+if (k < 13) {
 #else
-    length  = k;
-    if (n - i - 1 < k) length = n - i - 1;
-
-    AXPYU_K(length + 1, 0, 0,
-	   alpha * X[i],
-	   a, 1, Y + i, 1, NULL, 0);
-    Y[i] += alpha * DOTU_K(length, a + 1, 1, X + i + 1, 1);
+if (k < 19) {
 #endif
-
-    a += lda;
-  }
-
-  if (incy != 1) {
-    COPY_K(n, Y, 1, y, incy);
-  }
-
-  return 0;
+#endif
+    int n2 = n - k;
+    for (i = 0; i < n2; i++) {
+        length = i;
+        if (length > k)
+            length = k;
+        AXPYU_K(length + 1, 0, 0, alpha * X[i], a + k - length + lda * i, 1, Y + i - length, 1, NULL, 0);
+    }
+    VDOT_U_K(n2, k, alpha, a, lda, X, Y, length);
+    a += n2 * lda; 
+    for (; i < n; i++) {
+        length = i;
+        if (length > k)
+            length = k;
+        AXPYU_K(length + 1, 0, 0, alpha * X[i], a + k - length, 1, Y + i - length, 1, NULL, 0);
+        Y[i] += alpha * DOTU_K(length, a + k - length, 1, X + i - length, 1);
+        a += lda;
+    }
+#if defined(RISCV64_ZVL256B)
+} else {
+	for (i = 0; i < n; i++) {
+        	length = i;
+        	if (length > k)
+        	    length = k;  
+        	AXPYU_K(length + 1, 0, 0, alpha * X[i], a + k - length, 1, Y + i - length, 1, NULL, 0);
+        	Y[i] += alpha * DOTU_K(length, a + k - length, 1, X + i - length, 1);
+		a += lda;
+	}
 }
-
+#endif
+#else
+#if defined(RISCV64_ZVL256B)
+#if defined(DOUBLE)
+if (k < 10) {
+#else
+if (k < 19) {
+#endif
+#endif
+    int n2 = n - k;
+    for (i = 0; i < n2 ; i+=1)
+        AXPYU_K(k + 1, 0, 0, alpha * X[i], a + lda * i, 1, Y + i, 1, NULL, 0);
+    VDOT_L_K(n2, k, alpha, a, lda, X, Y, k);
+    a += n2 * lda; 
+    for (; i < n; i++) {
+        length = k;
+        if (n - i - 1 < k)
+            length = n - i - 1;
+        AXPYU_K(length + 1, 0, 0, alpha * X[i], a, 1, Y + i, 1, NULL, 0);
+        Y[i] += alpha * DOTU_K(length, a + 1, 1, X + i + 1, 1);
+        a += lda;
+    }
+#if defined(RISCV64_ZVL256B)
+} else {
+    for (i = 0; i < n; i++) {
+        length = k;
+        if (n - i - 1 < k)
+             length = n - i - 1;  
+        AXPYU_K(length + 1, 0, 0, alpha * X[i], a, 1, Y + i, 1, NULL, 0);
+        Y[i] += alpha * DOTU_K(length, a + 1, 1, X + i + 1, 1);
+        a += lda;
+    }
+}
+#endif
+#endif
+#else
+    for (i = 0; i < n; i++) {
+#ifndef LOWER
+        length = i;
+        if (length > k)
+            length = k;  
+        AXPYU_K(length + 1, 0, 0, alpha * X[i], a + k - length, 1, Y + i - length, 1, NULL, 0);
+        Y[i] += alpha * DOTU_K(length, a + k - length, 1, X + i - length, 1); 
+#else
+        length = k;
+        if (n - i - 1 < k)
+            length = n - i - 1;  
+        AXPYU_K(length + 1, 0, 0, alpha * X[i], a, 1, Y + i, 1, NULL, 0);
+        Y[i] += alpha * DOTU_K(length, a + 1, 1, X + i + 1, 1);
+#endif  
+        a += lda;
+    }
+#endif
+    if (incy != 1) {
+        COPY_K(n, Y, 1, y, incy);
+    }
+    return 0;
+}

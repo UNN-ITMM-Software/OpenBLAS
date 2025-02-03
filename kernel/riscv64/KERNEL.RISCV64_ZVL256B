@@ -1,3 +1,8 @@
+STBSV_N_KERNEL = tbsv_n_kernel_riscv64.c
+DTBSV_N_KERNEL = tbsv_n_kernel_riscv64.c
+STBSV_T_KERNEL = tbsv_t_kernel_riscv64.c
+DTBSV_T_KERNEL = tbsv_t_kernel_riscv64.c
+
 SAMAXKERNEL  = amax_vector.c
 DAMAXKERNEL  = amax_vector.c
 CAMAXKERNEL  = zamax_vector.c
@@ -7,6 +12,11 @@ SAMINKERNEL  = amin_vector.c
 DAMINKERNEL  = amin_vector.c
 CAMINKERNEL  = zamin_vector.c
 ZAMINKERNEL  = zamin_vector.c
+
+SVDOTKERNEL_L  = vdot_vector_L_riscv.c
+DVDOTKERNEL_L  = vdot_vector_L_riscv.c
+SVDOTKERNEL_U  = vdot_vector_U_riscv.c
+DVDOTKERNEL_U  = vdot_vector_U_riscv.c
 
 SMAXKERNEL   = max_vector.c
 DMAXKERNEL   = max_vector.c
@@ -197,3 +207,17 @@ endif
 ifndef ZGEMM_BETA
 ZGEMM_BETA = ../generic/zgemm_beta.c
 endif
+
+SGBMV_N_KERNEL = gbmv_n_kernel_rvv_1_0.c
+SGBMV_T_KERNEL = gbmv_t_kernel_rvv_1_0.c
+DGBMV_N_KERNEL = gbmv_n_kernel_rvv_1_0.c
+DGBMV_T_KERNEL = gbmv_t_kernel_rvv_1_0.c
+
+DTBMV_LN_KERNEL = tbmv_ln_kernel_rvv.c
+STBMV_LN_KERNEL = tbmv_ln_kernel_rvv.c
+DTBMV_UN_KERNEL = tbmv_un_kernel_rvv.c
+STBMV_UN_KERNEL = tbmv_un_kernel_rvv.c
+DTBMV_LT_KERNEL = tbmv_lt_kernel_rvv.c
+STBMV_LT_KERNEL = tbmv_lt_kernel_rvv.c
+DTBMV_UT_KERNEL = tbmv_ut_kernel_rvv.c
+STBMV_UT_KERNEL = tbmv_ut_kernel_rvv.c
